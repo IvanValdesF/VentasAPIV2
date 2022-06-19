@@ -38,8 +38,8 @@ namespace VentasAPI.Services
                     response.Correo = usuario.Correo;
                     response.Contraseña = usuario.Contraseña;
                     response.Rol = usuario.Rol;
-                    response.IDUsuario = usuario.Idusuario;
-                    response.NombreUsuario = usuario.NombreUsuario;
+                    response.Id = usuario.Id;
+                    response.Nombre = usuario.Nombre;
                     response.Token = getToken(usuario);
                     response.mensaje = "Sesion iniciada correctamente";
                 }
@@ -58,7 +58,7 @@ namespace VentasAPI.Services
                 Subject = new ClaimsIdentity(
                     new Claim[]
                     {
-                        new Claim(ClaimTypes.NameIdentifier, usuario.Idusuario.ToString()),
+                        new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
                         new Claim(ClaimTypes.Email, usuario.Correo)
                     }
                     ),

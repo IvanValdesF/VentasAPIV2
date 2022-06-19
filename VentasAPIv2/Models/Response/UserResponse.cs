@@ -4,8 +4,8 @@
     {
         public string Contraseña { get; set; }
         public string Correo { get; set; }
-        public int IDUsuario { get; set; }
-        public string NombreUsuario { get; set; }
+        public int Id { get; set; }
+        public string Nombre { get; set; }
         public int Rol { get; set; }
 
         public string Token { get; set; }

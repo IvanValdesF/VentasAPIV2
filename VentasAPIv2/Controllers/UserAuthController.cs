@@ -33,7 +33,7 @@ namespace VentasAPIv2.Controllers
                 using (SisVentasV2Context db = new SisVentasV2Context())
                 {
 
-                    var usuario = db.Usuarios.Where(u => u.NombreUsuario == oRequest.NombreUsuario).FirstOrDefault();
+                    var usuario = db.Usuarios.Where(u => u.Nombre == oRequest.Nombre).FirstOrDefault();
 
                     if(usuario == null)
                     {
@@ -43,18 +43,19 @@ namespace VentasAPIv2.Controllers
                     if (usuario == null)
                     {
                         Usuario oUsuario = new Usuario();
-                        oUsuario.NombreUsuario = oRequest.NombreUsuario;
+
+                        oUsuario.Nombre = oRequest.Nombre;
                         oUsuario.Contraseña = Encrypt.GetSHA256(oRequest.Contraseña);
                         oUsuario.Correo = oRequest.Correo;
                         oUsuario.Rol = oRequest.Rol;
-                        oUsuario.Idusuario = oRequest.IDUsuario;
+                        oUsuario.Id = oRequest.Id;
 
                        
                         db.Usuarios.Add(oUsuario);
                         
                         db.SaveChanges();
-                        oRespuesta.NombreUsuario = oUsuario.NombreUsuario;
-                        oRespuesta.IDUsuario = oUsuario.Idusuario;
+                        oRespuesta.Nombre = oUsuario.Nombre;
+                        oRespuesta.Id = oUsuario.Id;
                         oRespuesta.Contraseña = oUsuario.Contraseña;
                         oRespuesta.Correo = oUsuario.Correo;
                         oRespuesta.Rol = oUsuario.Rol;
@@ -79,9 +80,22 @@ namespace VentasAPIv2.Controllers
 
         public IActionResult Autenticar([FromBody] AuthRequest model)
         {
-
+            Sesionesactiva miSesion = new Sesionesactiva();
             Respuesta oRespuesta = new Respuesta();
             var userSresponse = _userService.Auth(model);
+
+            if(userSresponse != null)
+            {
+                
+
+                miSesion.Rol = userSresponse.Rol;
+                miSesion.Contraseña = userSresponse.Contraseña;
+                miSesion.Idusuario = userSresponse.Id;
+                miSesion.NombreUsuario = userSresponse.Nombre;
+                miSesion.Correo = userSresponse.Correo;
+            }
+
+            
 
             if (userSresponse == null)
             {
@@ -89,7 +103,46 @@ namespace VentasAPIv2.Controllers
                 oRespuesta.Exito = 0;
                 return BadRequest(oRespuesta);
             }
+            using(SisVentasV2Context db = new SisVentasV2Context())
+            {
+                
+                
+                db.Sesionesactivas.Add(miSesion);
+                db.SaveChanges();
 
+            }
+            
+            oRespuesta.Exito = 1;
+            oRespuesta.Data = userSresponse;
+            return Ok(userSresponse);
+        }
+
+        [HttpPost("logout")]
+
+        public IActionResult CerrarSesion([FromBody] AuthRequest model)
+        {
+
+            Respuesta oRespuesta = new Respuesta();
+
+            var userSresponse = _userService.Auth(model);
+            Sesionesactiva miSesion = new Sesionesactiva();
+
+            
+
+
+            using (SisVentasV2Context db = new SisVentasV2Context())
+            {
+
+                miSesion.Rol = userSresponse.Rol;
+                miSesion.Contraseña = userSresponse.Contraseña;
+                miSesion.Idusuario = userSresponse.Id;
+                miSesion.NombreUsuario = userSresponse.Nombre;
+                miSesion.Correo = userSresponse.Correo;
+                db.Sesionesactivas.Remove(miSesion);
+                db.SaveChanges();
+
+            }
+            userSresponse.mensaje = "Sesion terminada correctamenre";
             oRespuesta.Exito = 1;
             oRespuesta.Data = userSresponse;
             return Ok(userSresponse);
